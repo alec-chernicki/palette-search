@@ -1,11 +1,7 @@
 {
-  "name": "Palletable",
+  "name": "palletable",
   "version": "1.0.0",
   "description": "Color pallete inspiration directly from within Slack",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "color",
     "pallete",
@@ -13,5 +9,10 @@
     "slack"
   ],
   "author": "Alec Ortega",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.12.4",
+    "colourlovers": "^0.1.1",
+    "express": "^4.12.4"
+  }
 }
