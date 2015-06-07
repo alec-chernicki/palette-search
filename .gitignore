@@ -1,0 +1,13 @@
+# Coverage directory used by tools like istanbul
+coverage
+
+# Dependency directory
+node_modules
+
+# Debug log from npm
+npm-debug.log
+
+#####=== OSX ===#####
+.DS_Store
+.AppleDouble
+.LSOverride
