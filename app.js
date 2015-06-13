@@ -25,41 +25,66 @@ var formatColorRow = function (q) {
   return '*' + q.title + '*: ' + colors.toString();
 };
 
+var getPalettes = function (res, params, searchTerm) {
+  colourlovers.get('/palettes', params, function (err, data) {
+
+    if (err) {
+      return res.status(404).send('Uh oh, looks like something went wrong.');
+    }
+
+    // Construct list of palettes
+    var qs = ['Top color palettes for "' + searchTerm + '"\n']
+        .concat(data.map(formatColorRow));
+
+    // If no results found tell user to make broader search
+    if (qs.length === 1) {
+      return res.status(404).send('No questions found. Please try a broader search');
+    }
+
+    // Send message to Slack
+    res.setHeader('content-type', 'text/plain; charset=utf-8');
+    return res.status(200).send(qs.join('\r\n'));
+  });
+};
+
 // Main route
 app.post('/palette', function (req, res) {
 
   var searchTerm = req.body.text;
 
+  // Create object with keyword to send to API
+  var params = {
+    numResults: NUMBER_OF_PALETTES,
+    keywordExact: 1
+  };
+
+  // Check if input is a hex value
+  if (/^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(searchTerm)) {
+
+    // Remove '#' character
+    var hex = searchTerm.substr(1, searchTerm.length);
+
+    // Convert into 6 character HEX if input is 3 character HEX
+    if (hex.length === 3) {
+      hex = new Array(3).join(hex.charAt(0) +
+                              hex.charAt(1) +
+                              hex.charAt(2));
+    }
+
+    // Add hex to params
+    params.hex = hex;
+
+    getPalettes(res, params, searchTerm);
+  }
+
   // Check if input is a search term
-  if (/^[a-zA-Z0-9 ]+$/.test(searchTerm)) {
+  else if (/^[a-zA-Z0-9 ]+$/.test(searchTerm)) {
 
-    // Create object to send to API
-    var params = {
-      numResults: NUMBER_OF_PALETTES,
-      keywords: searchTerm,
-      keywordExact: 1
-    };
+    // Adds search term to params
+    params.keywords = searchTerm;
+    params.orderCol = 'dateCreated';
 
-    // Request palettes from COLOURlovers
-    colourlovers.get('/palettes', params, function (err, data) {
-      if (err) {
-        res.status(404).send('Uh oh, looks like something went wrong.');
-      }
-
-      // Construct list of palettes
-      var qs = ['Top color palettes for "' + searchTerm + '"\n']
-          .concat(data.map(formatColorRow));
-
-      // If no results found tell user to make broader search
-      if (qs.length === 1) {
-        res.status(204).send('No questions found. Please try a broader search');
-      }
-
-      // Send message to Slack
-      res.setHeader('content-type', 'text/plain; charset=utf-8');
-      res.status(200).send(qs.join('\r\n'));
-
-    });
+    getPalettes(res, params, searchTerm);
   }
 
   // For when you can't paint with all the colors of the wind
