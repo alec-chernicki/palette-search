@@ -15,6 +15,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Change this to change how many palettes are returned
 var NUMBER_OF_PALETTES = 3;
 
+var checkHex = function (hex) {
+
+  // Convert into 6 character HEX if input is 3 character HEX
+  if (hex.length === 3) {
+    return new Array(3).join(hex.charAt(0) +
+        hex.charAt(1) +
+        hex.charAt(2));
+  }
+};
+
 var formatColorRow = function (q) {
 
   // Add pound to beginning of each color
@@ -23,6 +33,14 @@ var formatColorRow = function (q) {
   });
 
   return '*' + q.title + '*: ' + colors.toString();
+};
+
+var formatHexValues = function (q) {
+  return q.replace(/#/g, '')
+          .replace(/\s/g, '')
+          .split(',')
+          .map(checkHex)
+          .toString();
 };
 
 var getPalettes = function (res, params, searchTerm) {
@@ -52,27 +70,16 @@ app.post('/palette', function (req, res) {
 
   var searchTerm = req.body.text;
 
-  // Create object with keyword to send to API
+  // Create object to send to API
   var params = {
     numResults: NUMBER_OF_PALETTES,
     keywordExact: 1
   };
 
-  // Check if input is a hex value
-  if (/^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(searchTerm)) {
+  // Check if input is one or more hex values
+  if (/(#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3}) *,* *)+/.test(searchTerm)) {
 
-    // Remove '#' character
-    var hex = searchTerm.substr(1, searchTerm.length);
-
-    // Convert into 6 character HEX if input is 3 character HEX
-    if (hex.length === 3) {
-      hex = new Array(3).join(hex.charAt(0) +
-                              hex.charAt(1) +
-                              hex.charAt(2));
-    }
-
-    // Add hex to params
-    params.hex = hex;
+    params.hex = formatHexValues(searchTerm);
 
     getPalettes(res, params, searchTerm);
   }
@@ -80,7 +87,6 @@ app.post('/palette', function (req, res) {
   // Check if input is a search term
   else if (/^[a-zA-Z0-9 ]+$/.test(searchTerm)) {
 
-    // Adds search term to params
     params.keywords = searchTerm;
     params.orderCol = 'dateCreated';
 

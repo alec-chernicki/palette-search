@@ -12,9 +12,9 @@ Color palette inspiration from directly within Slack
 ```
 
 **Build palettes containing a specific color**
-- Use the format `/palette <HEX value>` to build a list of palettes that include any HEX color that you pass to it. 
+- Use the format `/palette <HEX value>` or `/palette <HEX value>, <HEX value>` to build a list of palettes that includes up to five HEX colors of your choosing. 
 ```
-/palette #3B5998
+/palette #3B5998, #6D84B4
 ```
 
 The questions will be shown on the same channel that the command was entered and only visible to you.
