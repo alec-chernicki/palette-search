@@ -1,4 +1,4 @@
-# Palettable
+# Palette Search
 
 Color palette inspiration from directly within Slack
 
